@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { difficultyLadder } from './engine/adaptive'
+import { scoreTest } from './engine/scoring'
 import { SECTION_LABEL, TEST_PLAN, TOTAL_ITEMS, itemAt } from './engine/testPlan'
 import type { Difficulty, ItemType } from './lib/types'
 import Home from './screens/Home'
@@ -19,12 +21,10 @@ type Phase =
   | { name: 'test'; seed: number; startedAt: number; answers: AnswerRecord[] }
   | { name: 'finished'; seed: number; answers: AnswerRecord[] }
 
-/**
- * Difficulty for the next item. Placeholder: fixed at 2 until the adaptive
- * engine lands in step 4 (items 1-3 at difficulty 2, then ±1 per answer).
- */
-function difficultyFor(_answers: AnswerRecord[]): Difficulty {
-  return 2
+/** Adaptive difficulty for the next item: items 1-3 at 2, then ±1 per answer. */
+function difficultyFor(answers: AnswerRecord[]): Difficulty {
+  const ladder = difficultyLadder(answers.map(a => a.correct))
+  return ladder[ladder.length - 1]
 }
 
 /** Dev-only component harness: /?preview=matrix|series|spatial|weights */
@@ -106,13 +106,15 @@ export default function App() {
 
   if (phase.name === 'finished') {
     // Placeholder until the results page lands in step 5.
-    const correct = phase.answers.filter(a => a.correct).length
+    const report = scoreTest(phase.answers)
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center gap-5 px-4 py-10">
         <h1 className="text-3xl font-bold text-slate-900">Test complete</h1>
         <p className="text-slate-700">
-          You answered {phase.answers.length} items ({correct} correct — provisional count;
-          scoring and the full results page arrive in the next build steps).
+          Provisional: raw score {report.raw} ({report.band}, based on an <em>assumed</em>{' '}
+          distribution — not norming data), IQ-equivalent range {report.iqRange[0]}–
+          {report.iqRange[1]}. The full results page with per-item explanations arrives in the
+          next build step.
         </p>
         <button
           type="button"
