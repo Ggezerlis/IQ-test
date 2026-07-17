@@ -138,34 +138,88 @@ function pickRecipe(difficulty: Difficulty, rng: Rng): SeriesRecipe {
   }
 }
 
+export interface WrongContinuation {
+  value: number
+  /** The misreading that produces this value — reused verbatim by the explanation screen. */
+  why: string
+}
+
 /** Wrong continuations, most tempting first. */
-function wrongContinuations(recipe: SeriesRecipe, terms: number[]): number[] {
+export function wrongContinuations(recipe: SeriesRecipe, terms: number[]): WrongContinuation[] {
   const n = terms.length
   const last = terms[n - 2] // last SHOWN term
   const prev = terms[n - 3]
   const answer = terms[n - 1]
   switch (recipe.kind) {
-    case 'arithmetic':
-      return [last + recipe.d + 1, last + recipe.d - 1, last + 2 * recipe.d, last - recipe.d, last, answer + 2]
+    case 'arithmetic': {
+      const d = recipe.d
+      return [
+        { value: last + d + 1, why: `uses a step of ${d + 1} instead of ${d}` },
+        { value: last + d - 1, why: `uses a step of ${d - 1} instead of ${d}` },
+        { value: last + 2 * d, why: 'skips one step' },
+        { value: last - d, why: 'steps in the wrong direction' },
+        { value: last, why: 'repeats the last term' },
+        { value: answer + 2, why: 'is a near miss' },
+      ]
+    }
     case 'geometric':
-      return [last + (last - prev), last * (recipe.r + 1), last * (recipe.r - 1), answer + recipe.r, answer - recipe.r, answer + 1]
-    case 'second-order':
-      return [last + (last - prev), last + (last - prev) + 2 * recipe.e, last + (last - prev) - recipe.e, last + recipe.d0, answer + 1, answer - 1]
+      return [
+        { value: last + (last - prev), why: `adds the last difference instead of multiplying by ${recipe.r}` },
+        { value: last * (recipe.r + 1), why: `multiplies by ${recipe.r + 1} instead of ${recipe.r}` },
+        { value: last * (recipe.r - 1), why: `multiplies by ${recipe.r - 1} instead of ${recipe.r}` },
+        { value: answer + recipe.r, why: 'is a near miss' },
+        { value: answer - recipe.r, why: 'is a near miss' },
+        { value: answer + 1, why: 'is a near miss' },
+      ]
+    case 'second-order': {
+      const gap = last - prev
+      return [
+        { value: last + gap, why: `keeps the gap at ${gap} instead of growing it by ${recipe.e}` },
+        { value: last + gap + 2 * recipe.e, why: `grows the gap by ${2 * recipe.e} instead of ${recipe.e}` },
+        { value: last + gap - recipe.e, why: 'shrinks the gap instead of growing it' },
+        { value: last + recipe.d0, why: 'reuses the very first gap' },
+        { value: answer + 1, why: 'is a near miss' },
+        { value: answer - 1, why: 'is a near miss' },
+      ]
+    }
     case 'fibonacci':
-      return [last + terms[n - 4], 2 * last, answer + 1, answer - 1, last + prev + 2, 2 * last - prev]
+      return [
+        { value: last + terms[n - 4], why: 'sums the wrong pair of earlier terms' },
+        { value: 2 * last, why: 'doubles the last term instead of summing the last two' },
+        { value: answer + 1, why: 'is a near miss' },
+        { value: answer - 1, why: 'is a near miss' },
+        { value: last + prev + 2, why: 'is a near miss' },
+        { value: 2 * last - prev, why: 'continues the last difference instead of summing' },
+      ]
     case 'alternating': {
       // The op producing term i+1 from term i is opA when i is even; the
       // answer (index n-1) comes from index n-2.
       const nextOp = (n - 2) % 2 === 0 ? recipe.opA : recipe.opB
       const otherOp = nextOp === recipe.opA ? recipe.opB : recipe.opA
-      return [applyOp(last, otherOp), applyOp(last, { ...nextOp, op: nextOp.op === '+' ? '-' : nextOp.op === '-' ? '+' : '*' }),
-        answer + 1, answer - 1, applyOp(applyOp(last, nextOp), otherOp), last]
+      return [
+        { value: applyOp(last, otherOp), why: 'applies the other operation out of turn' },
+        {
+          value: applyOp(last, { ...nextOp, op: nextOp.op === '+' ? '-' : nextOp.op === '-' ? '+' : '*' }),
+          why: 'reverses the operation',
+        },
+        { value: answer + 1, why: 'is a near miss' },
+        { value: answer - 1, why: 'is a near miss' },
+        { value: applyOp(applyOp(last, nextOp), otherOp), why: 'applies both operations at once' },
+        { value: last, why: 'repeats the last term' },
+      ]
     }
     case 'interleaved': {
       // n = 8, so the answer (index 7) continues thread B. Last shown values:
       const lastA = terms[n - 2] // index 6, thread A
       const lastB = terms[n - 3] // index 5, thread B
-      return [lastA + recipe.dA, lastB + recipe.dA, lastA + recipe.dB, answer + 1, answer - 1, answer + 2]
+      return [
+        { value: lastA + recipe.dA, why: 'continues the other interleaved thread' },
+        { value: lastB + recipe.dA, why: "applies the other thread's step" },
+        { value: lastA + recipe.dB, why: 'mixes the two threads' },
+        { value: answer + 1, why: 'is a near miss' },
+        { value: answer - 1, why: 'is a near miss' },
+        { value: answer + 2, why: 'is a near miss' },
+      ]
     }
   }
 }
@@ -187,11 +241,11 @@ export function generateSeriesItem(difficulty: Difficulty, seed: number): Series
 
     const distractors: number[] = []
     const seen = new Set<number>([answer])
-    for (const c of wrongContinuations(recipe, terms)) {
+    for (const { value } of wrongContinuations(recipe, terms)) {
       if (distractors.length >= 5) break
-      if (!Number.isInteger(c) || Math.abs(c) > 9999 || seen.has(c)) continue
-      seen.add(c)
-      distractors.push(c)
+      if (!Number.isInteger(value) || Math.abs(value) > 9999 || seen.has(value)) continue
+      seen.add(value)
+      distractors.push(value)
     }
     // Near-miss slips as padding when the recipe's misreadings collide.
     for (const delta of [1, -1, 2, -2, 3, -3, 4, -4]) {

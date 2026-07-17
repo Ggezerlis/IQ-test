@@ -92,7 +92,7 @@ export interface WeightsGeneration {
   optionVecs: Vec[]
 }
 
-function describePan(shapeKinds: ShapeId[], v: Vec): string {
+export function describePan(shapeKinds: ShapeId[], v: Vec): string {
   const parts = shapeKinds
     .map((s, i) => (v[i] > 0 ? `${v[i]} ${s}${v[i] > 1 ? 's' : ''}` : ''))
     .filter(Boolean)

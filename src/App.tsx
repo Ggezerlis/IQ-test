@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react'
 import { difficultyLadder } from './engine/adaptive'
-import { scoreTest } from './engine/scoring'
 import { SECTION_LABEL, TEST_PLAN, TOTAL_ITEMS, itemAt } from './engine/testPlan'
 import type { Difficulty, ItemType } from './lib/types'
 import Home from './screens/Home'
 import Question from './screens/Question'
-import Disclaimer from './components/Disclaimer'
+import Results from './screens/Results'
 
 const SOFT_CAP_MS = 20 * 60 * 1000
 
@@ -19,7 +18,7 @@ export interface AnswerRecord {
 type Phase =
   | { name: 'home' }
   | { name: 'test'; seed: number; startedAt: number; answers: AnswerRecord[] }
-  | { name: 'finished'; seed: number; answers: AnswerRecord[] }
+  | { name: 'finished'; seed: number; choices: number[]; elapsedMs: number }
 
 /** Adaptive difficulty for the next item: items 1-3 at 2, then ±1 per answer. */
 function difficultyFor(answers: AnswerRecord[]): Difficulty {
@@ -87,8 +86,14 @@ export default function App() {
           difficulty: item.difficulty,
         },
       ]
-      if (answers.length >= TOTAL_ITEMS) setPhase({ name: 'finished', seed: phase.seed, answers })
-      else setPhase({ ...phase, answers })
+      if (answers.length >= TOTAL_ITEMS) {
+        setPhase({
+          name: 'finished',
+          seed: phase.seed,
+          choices: answers.map(a => a.optionIndex),
+          elapsedMs: Date.now() - phase.startedAt,
+        })
+      } else setPhase({ ...phase, answers })
     }
     return (
       <Question
@@ -105,26 +110,13 @@ export default function App() {
   }
 
   if (phase.name === 'finished') {
-    // Placeholder until the results page lands in step 5.
-    const report = scoreTest(phase.answers)
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center gap-5 px-4 py-10">
-        <h1 className="text-3xl font-bold text-slate-900">Test complete</h1>
-        <p className="text-slate-700">
-          Provisional: raw score {report.raw} ({report.band}, based on an <em>assumed</em>{' '}
-          distribution — not norming data), IQ-equivalent range {report.iqRange[0]}–
-          {report.iqRange[1]}. The full results page with per-item explanations arrives in the
-          next build step.
-        </p>
-        <button
-          type="button"
-          onClick={() => setPhase({ name: 'home' })}
-          className="w-fit rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700"
-        >
-          Back to start
-        </button>
-        <Disclaimer />
-      </main>
+      <Results
+        seed={phase.seed}
+        choices={phase.choices}
+        elapsedMs={phase.elapsedMs}
+        onRestart={() => setPhase({ name: 'home' })}
+      />
     )
   }
 
