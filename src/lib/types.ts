@@ -38,6 +38,28 @@ export type SVGSpec =
       cells: (Figure | null)[]
       describe: string
     }
+  | {
+      /** Spatial items: a polyomino-style figure as unit squares on a grid. */
+      kind: 'cells'
+      cells: [number, number][]
+      describe: string
+    }
+  | {
+      /** Weights items: balanced example scales plus the target scale with an unknown right pan. */
+      kind: 'scales'
+      shapeKinds: ShapeId[]
+      /** Per-scale shape counts, indexed like shapeKinds. */
+      equations: { left: number[]; right: number[] }[]
+      targetLeft: number[]
+      describe: string
+    }
+  | {
+      /** Weights answer option: a multiset of shapes shown in a row. */
+      kind: 'shapeset'
+      shapeKinds: ShapeId[]
+      counts: number[]
+      describe: string
+    }
 
 export interface Item {
   id: string

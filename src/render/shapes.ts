@@ -7,7 +7,7 @@
  * Okabe–Ito palette — a rule expressed through fill always co-varies pattern
  * and color, never color alone.
  */
-import type { DecorationId, Figure, ShapeId } from '../lib/types'
+import type { DecorationId, Figure, FillId, ShapeId } from '../lib/types'
 
 /** Rotational symmetry period in degrees; rotating by a multiple is a no-op. */
 export const SYMMETRY_PERIOD: Record<ShapeId, number> = {
@@ -57,7 +57,7 @@ const FILL_INFO: Record<string, { paint: (uid: string) => string; word: string }
   cross: { paint: uid => `url(#${uid}-cross)`, word: 'pink-crosshatched' },
 }
 
-function patternDefs(uid: string): string {
+export function patternDefs(uid: string): string {
   return `<defs>
 <pattern id="${uid}-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#ffffff"/><line x1="0" y1="0" x2="0" y2="7" stroke="#E69F00" stroke-width="3"/></pattern>
 <pattern id="${uid}-dots" width="7" height="7" patternUnits="userSpaceOnUse"><rect width="7" height="7" fill="#ffffff"/><circle cx="3.5" cy="3.5" r="1.7" fill="#009E73"/></pattern>
@@ -133,6 +133,15 @@ export function figureBody(f: Figure, uid: string): string {
   })
   if (f.decoration) parts.push(decorationSvg(f.decoration))
   return parts.join('')
+}
+
+/** Single unrotated glyph at an arbitrary position — used by composite renderers (scales, shape sets). */
+export function glyphSvg(shape: ShapeId, fill: FillId, cx: number, cy: number, r: number, uid: string): string {
+  return glyph(shape, cx, cy, r, 0, FILL_INFO[fill].paint(uid))
+}
+
+export function fillWord(fill: FillId): string {
+  return FILL_INFO[fill].word
 }
 
 const SIZE_WORD = { 1: 'small', 2: 'medium', 3: 'large' } as const
