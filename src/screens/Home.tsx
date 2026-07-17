@@ -8,9 +8,15 @@ const SECTIONS = [
   { name: 'Figure weights', detail: '6 items — balance the scales' },
 ]
 
-export default function Home({ onStart }: { onStart: () => void }) {
+export default function Home({ onStart, challenge = false }: { onStart: () => void; challenge?: boolean }) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center gap-6 px-4 py-10">
+      {challenge && (
+        <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+          <strong>Challenge accepted?</strong> This link carries a seed — you'll get the exact
+          same 30 puzzles as the person who sent it.
+        </div>
+      )}
       <div>
         <h1 className="text-4xl font-bold tracking-tight text-slate-900">{APP_NAME}</h1>
         <p className="mt-2 text-lg text-slate-600">

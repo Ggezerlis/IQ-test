@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Disclaimer from '../components/Disclaimer'
 import { replayTest, type ItemReview } from '../engine/explain'
 import { SECTION_LABEL } from '../engine/testPlan'
+import { encodeShare } from '../lib/share'
 import SvgItem from '../render/SvgItem'
 
 function fmtTime(ms: number): string {
@@ -73,12 +74,46 @@ function ReviewCard({ review }: { review: ItemReview }) {
   )
 }
 
+function ShareRow({ label, note, url }: { label: string; note: string; url: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline gap-2">
+        <span className="text-sm font-medium text-slate-800">{label}</span>
+        <span className="text-xs text-slate-500">{note}</span>
+      </div>
+      <div className="flex gap-2">
+        <input
+          readOnly
+          value={url}
+          aria-label={`${label} URL`}
+          onFocus={e => e.currentTarget.select()}
+          className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-700"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard?.writeText(url).then(() => {
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            })
+          }}
+          className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          {copied ? 'Copied ✓' : 'Copy'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Results({
   seed, choices, elapsedMs, onRestart,
 }: {
   seed: number
   choices: number[]
-  elapsedMs: number
+  /** Unknown when viewing someone else's shared results. */
+  elapsedMs?: number
   onRestart: () => void
 }) {
   const { reviews, report } = useMemo(() => replayTest(seed, choices), [seed, choices])
@@ -93,9 +128,10 @@ export default function Results({
         <span className="text-lg text-slate-700">IQ-equivalent ≈ {report.iqRange[0]}–{report.iqRange[1]}</span>
       </div>
       <p className="mb-3 mt-1 text-sm text-slate-600">
-        {correct} of {reviews.length} correct · raw score {report.raw} (difficulty-weighted) ·{' '}
-        {fmtTime(elapsedMs)} · {report.comparative} — percentile and IQ range are computed from an{' '}
-        <strong>assumed</strong> normal distribution, not from norming data.
+        {correct} of {reviews.length} correct · raw score {report.raw} (difficulty-weighted)
+        {elapsedMs !== undefined && <> · {fmtTime(elapsedMs)}</>} · {report.comparative} —
+        percentile and IQ range are computed from an <strong>assumed</strong> normal
+        distribution, not from norming data.
       </p>
       <Disclaimer />
 
@@ -131,6 +167,20 @@ export default function Results({
         <div className="flex flex-col gap-2">
           {reviews.map(r => <ReviewCard key={r.position} review={r} />)}
         </div>
+      </section>
+
+      <section className="mt-8 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4" aria-label="Share">
+        <h2 className="text-lg font-semibold text-slate-900">Share</h2>
+        <ShareRow
+          label="Challenge a friend"
+          note="they get the identical 30 puzzles, unanswered"
+          url={`${window.location.origin}${window.location.pathname}${encodeShare({ seed })}`}
+        />
+        <ShareRow
+          label="Share these results"
+          note="opens this page — including all answers and explanations"
+          url={`${window.location.origin}${window.location.pathname}${encodeShare({ seed, choices })}`}
+        />
       </section>
 
       <div className="mt-8 flex gap-3">

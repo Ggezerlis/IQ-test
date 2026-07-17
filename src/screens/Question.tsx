@@ -37,7 +37,7 @@ export default function Question({
   }, [selected, onConfirm])
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 py-5">
+    <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 py-5">
       <header className="flex items-center gap-4">
         <div className="flex-1">
           <ProgressBar position={position} total={total} sectionLabel={sectionLabel} />
@@ -77,6 +77,6 @@ export default function Question({
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
