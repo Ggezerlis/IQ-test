@@ -56,7 +56,16 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   )
 }
 
-export default function Home({ onStart, challenge = false }: { onStart: () => void; challenge?: boolean }) {
+export default function Home({
+  onStart, challenge = false, resumeAt, onResume, onDiscard,
+}: {
+  onStart: () => void
+  challenge?: boolean
+  /** 1-based item number an interrupted test would continue at. */
+  resumeAt?: number
+  onResume?: () => void
+  onDiscard?: () => void
+}) {
   return (
     <div className="min-h-screen bg-white">
       <section className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-14">
@@ -64,6 +73,30 @@ export default function Home({ onStart, challenge = false }: { onStart: () => vo
           <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
             <strong>Challenge accepted?</strong> This link carries a seed — you'll get the exact
             same 30 puzzles as the person who sent it.
+          </div>
+        )}
+        {resumeAt !== undefined && onResume && (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+            <span className="min-w-0 flex-1">
+              <strong>Test in progress.</strong> You were on item {resumeAt} of 30 — your answers
+              and the clock are saved in this browser.
+            </span>
+            <span className="flex gap-2">
+              <button
+                type="button"
+                onClick={onResume}
+                className="rounded-lg bg-blue-600 px-4 py-1.5 font-medium text-white hover:bg-blue-700"
+              >
+                Resume
+              </button>
+              <button
+                type="button"
+                onClick={onDiscard}
+                className="rounded-lg border border-blue-300 px-4 py-1.5 font-medium text-blue-800 hover:bg-blue-100"
+              >
+                Discard
+              </button>
+            </span>
           </div>
         )}
         <div>

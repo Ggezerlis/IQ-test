@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import { difficultyLadder } from './engine/adaptive'
+import { replayTest } from './engine/explain'
 import { SECTION_LABEL, TEST_PLAN, TOTAL_ITEMS, itemAt } from './engine/testPlan'
 import type { Difficulty, ItemType } from './lib/types'
+import { clearSession, loadSession, saveSession } from './lib/session'
 import { encodeShare, parseShare } from './lib/share'
 import Home from './screens/Home'
 import Question from './screens/Question'
@@ -43,6 +45,8 @@ function previewType(): ItemType | null {
 
 export default function App() {
   const [phase, setPhase] = useState<Phase>(initialPhase)
+  // Read once on mount; cleared or overwritten as the test progresses.
+  const [saved, setSaved] = useState(() => loadSession())
   const preview = previewType()
 
   const position = phase.name === 'test' ? phase.answers.length : 0
@@ -73,14 +77,45 @@ export default function App() {
     return (
       <Home
         challenge={phase.challengeSeed !== undefined}
-        onStart={() =>
+        resumeAt={saved ? saved.choices.length + 1 : undefined}
+        onResume={
+          saved
+            ? () => {
+                // Rebuild the in-progress state by replaying the saved
+                // choices — same regeneration path the results page uses.
+                const { reviews } = replayTest(saved.seed, saved.choices)
+                setPhase({
+                  name: 'test',
+                  seed: saved.seed,
+                  startedAt: Date.now() - saved.elapsedMs,
+                  answers: reviews.map(r => ({
+                    itemId: r.item.id,
+                    optionIndex: r.chosenIndex,
+                    correct: r.correct,
+                    difficulty: r.difficulty,
+                  })),
+                })
+              }
+            : undefined
+        }
+        onDiscard={
+          saved
+            ? () => {
+                clearSession()
+                setSaved(null)
+              }
+            : undefined
+        }
+        onStart={() => {
+          clearSession()
+          setSaved(null)
           setPhase({
             name: 'test',
             seed: phase.challengeSeed ?? Math.floor(Math.random() * 0xffffffff),
             startedAt: Date.now(),
             answers: [],
           })
-        }
+        }}
       />
     )
   }
@@ -98,6 +133,8 @@ export default function App() {
       ]
       if (answers.length >= TOTAL_ITEMS) {
         const choices = answers.map(a => a.optionIndex)
+        clearSession()
+        setSaved(null)
         // Make the address bar shareable/bookmarkable right away.
         window.history.replaceState(null, '', encodeShare({ seed: phase.seed, choices }))
         setPhase({
@@ -106,7 +143,14 @@ export default function App() {
           choices,
           elapsedMs: Date.now() - phase.startedAt,
         })
-      } else setPhase({ ...phase, answers })
+      } else {
+        saveSession({
+          seed: phase.seed,
+          choices: answers.map(a => a.optionIndex),
+          elapsedMs: Date.now() - phase.startedAt,
+        })
+        setPhase({ ...phase, answers })
+      }
     }
     return (
       <Question

@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gallery": "tsx scripts/gallery.ts"
+    "gallery": "tsx scripts/gallery.ts",
+    "og": "tsx scripts/og.ts",
+    "e2e": "node e2e/run.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

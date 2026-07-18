@@ -29,6 +29,11 @@ jobs:
         env:
           # Project pages are served from /<repo>/, so Vite needs that base.
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          # Absolute URL for og:image / og:url in link previews.
+          VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      # Browser-level end-to-end tests against the built site.
+      - run: npx playwright@$(node -p "require('playwright-core/package.json').version") install --with-deps chromium
+      - run: npm run e2e
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
