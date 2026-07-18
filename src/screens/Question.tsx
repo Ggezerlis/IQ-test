@@ -38,7 +38,7 @@ export default function Question({
 
   return (
     <>
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-28 pt-5">
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-36 pt-5">
         <header className="flex items-center gap-4">
           <div className="flex-1">
             <ProgressBar position={position} total={total} sectionLabel={sectionLabel} />
@@ -70,17 +70,17 @@ export default function Question({
       {/* Fixed to the viewport so Confirm is always reachable, however tall the item is. */}
       <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur">
         <div
-          className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3"
+          className="mx-auto flex max-w-4xl flex-col gap-2 px-4 py-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
-          <p className="text-xs text-slate-500">
+          <p className="text-center text-xs text-slate-500">
             Arrow keys or 1–6 to select · Enter to confirm
           </p>
           <button
             type="button"
             disabled={selected === null}
             onClick={() => selected !== null && onConfirm(selected)}
-            className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Confirm
           </button>
