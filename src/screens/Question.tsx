@@ -13,7 +13,7 @@ const INSTRUCTION: Record<ItemType, string> = {
 }
 
 export default function Question({
-  item, position, total, sectionLabel, startedAt, softCapMs, onConfirm,
+  item, position, total, sectionLabel, startedAt, softCapMs, onConfirm, onPause,
 }: {
   item: Item
   position: number
@@ -22,6 +22,7 @@ export default function Question({
   startedAt: number
   softCapMs: number
   onConfirm: (optionIndex: number) => void
+  onPause?: () => void
 }) {
   const [selected, setSelected] = useState<number | null>(null)
 
@@ -39,18 +40,27 @@ export default function Question({
   return (
     <>
       <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-36 pt-5">
-        <header className="flex items-center gap-4">
+        <header className="flex items-center gap-3">
           <div className="flex-1">
             <ProgressBar position={position} total={total} sectionLabel={sectionLabel} />
           </div>
           <Timer startedAt={startedAt} softCapMs={softCapMs} />
+          {onPause && (
+            <button
+              type="button"
+              onClick={onPause}
+              className="rounded-md border border-slate-300 px-2.5 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              Pause
+            </button>
+          )}
         </header>
 
-        <h1 className="text-lg font-semibold text-slate-900">{INSTRUCTION[item.type]}</h1>
+        <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{INSTRUCTION[item.type]}</h1>
 
         <div className="flex flex-col gap-5 md:flex-row md:items-start">
           {typeof item.prompt === 'string' ? (
-            <p className="shrink-0 py-4 text-3xl tracking-wide text-slate-900 tabular-nums md:max-w-xs">
+            <p className="shrink-0 py-4 text-3xl tracking-wide text-slate-900 tabular-nums md:max-w-xs dark:text-slate-100">
               {item.prompt}
             </p>
           ) : (
@@ -68,19 +78,19 @@ export default function Question({
       </main>
 
       {/* Fixed to the viewport so Confirm is always reachable, however tall the item is. */}
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur">
+      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
         <div
           className="mx-auto flex max-w-4xl flex-col gap-2 px-4 py-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
         >
-          <p className="text-center text-xs text-slate-500">
+          <p className="text-center text-xs text-slate-500 dark:text-slate-400">
             Arrow keys or 1–6 to select · Enter to confirm
           </p>
           <button
             type="button"
             disabled={selected === null}
             onClick={() => selected !== null && onConfirm(selected)}
-            className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
           >
             Confirm
           </button>

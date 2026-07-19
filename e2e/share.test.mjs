@@ -1,17 +1,14 @@
 // Share links: finishing a test produces working challenge + results URLs;
 // a results link reproduces the identical band, a challenge link the
 // identical test.
+import { answerAll } from './flow.test.mjs'
 import { assert } from './helpers.mjs'
 
 export default async function shareTest(browser, baseUrl) {
   const page = await browser.newPage({ viewport: { width: 1100, height: 950 } })
   await page.goto(baseUrl)
   await page.getByRole('button', { name: 'Start the test' }).first().click()
-  for (let i = 0; i < 30; i++) {
-    await page.waitForSelector(`text=Item ${i + 1} of 30`)
-    await page.locator('[role=radio]').nth((i * 3) % 6).click()
-    await page.getByRole('button', { name: 'Confirm' }).click()
-  }
+  await answerAll(page, 'first')
   await page.waitForSelector('text=Your results')
 
   const band = await page.locator('main .text-4xl').first().textContent()
@@ -27,6 +24,8 @@ export default async function shareTest(browser, baseUrl) {
   await viewer.waitForSelector('text=Your results')
   assert((await viewer.locator('main .text-4xl').first().textContent()) === band, 'shared results band differs')
   assert((await viewer.locator('details').count()) === 30, 'shared results missing cards')
+  // Timings are private to the taker's browser — never in the URL.
+  assert((await viewer.locator('text=longest').count()) === 0, 'shared results should not show timings')
   await viewer.close()
 
   const descOf = async () => {
@@ -34,6 +33,7 @@ export default async function shareTest(browser, baseUrl) {
     await friend.goto(challengeUrl)
     await friend.waitForSelector('text=Challenge accepted?')
     await friend.getByRole('button', { name: 'Start the test' }).first().click()
+    await friend.getByRole('button', { name: 'Begin' }).click()
     await friend.waitForSelector('text=Item 1 of 30')
     const d = await friend.locator('main svg desc').first().textContent()
     await friend.close()

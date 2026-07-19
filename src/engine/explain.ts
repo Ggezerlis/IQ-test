@@ -93,7 +93,7 @@ function matrixAttrValue(f: Figure, attr: FigureAttribute): string {
   }
 }
 
-function explainMatrix(gen: MatrixGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
+export function explainMatrix(gen: MatrixGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
   const { item, grid, rules } = gen
   const answer = grid[8]
   const wrongIdx = chosen !== item.correctIndex ? chosen : [0, 1, 2, 3, 4, 5].find(i => i !== item.correctIndex)!
@@ -161,7 +161,7 @@ function seriesNarrative(recipe: SeriesRecipe, terms: number[]): { rule: string;
   }
 }
 
-function explainSeries(gen: SeriesGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
+export function explainSeries(gen: SeriesGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
   const { item, recipe, terms } = gen
   const narrative = seriesNarrative(recipe, terms)
   const wrongIdx = chosen !== item.correctIndex ? chosen : [0, 1, 2, 3, 4, 5].find(i => i !== item.correctIndex)!
@@ -177,7 +177,7 @@ function explainSeries(gen: SeriesGeneration, chosen: number): Pick<ItemReview, 
 
 // ---------- spatial ----------
 
-function explainSpatial(gen: SpatialGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
+export function explainSpatial(gen: SpatialGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
   const { item, correctRotation, foils } = gen
   const rules = [
     `Exactly one option is the target figure turned by a multiple of 90° — here ${correctRotation * 90}°.`,
@@ -203,7 +203,7 @@ function explainSpatial(gen: SpatialGeneration, chosen: number): Pick<ItemReview
 
 // ---------- weights ----------
 
-function explainWeights(gen: WeightsGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
+export function explainWeights(gen: WeightsGeneration, chosen: number): Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'> {
   const { item, shapeKinds, weights, equations, targetLeft, optionVecs } = gen
   const dot = (v: number[]) => v.reduce((s, x, i) => s + x * weights[i], 0)
   const rules = [

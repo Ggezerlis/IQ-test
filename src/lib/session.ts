@@ -6,12 +6,14 @@
  */
 import { TOTAL_ITEMS } from '../engine/testPlan'
 
-const KEY = 'freeiq-session-v1'
+const KEY = 'freeiq-session-v2'
 
 export interface SavedSession {
   seed: number
   choices: number[]
   elapsedMs: number
+  /** Per-answer time spent, same length as choices. */
+  itemMs: number[]
 }
 
 interface StorageLike {
@@ -62,7 +64,12 @@ export function loadSession(storage = defaultStorage()): SavedSession | null {
       !data.choices.every(c => Number.isInteger(c) && c >= 0 && c <= 5)
     ) return null
     if (typeof data.elapsedMs !== 'number' || !Number.isFinite(data.elapsedMs) || data.elapsedMs < 0) return null
-    return { seed: data.seed, choices: data.choices, elapsedMs: data.elapsedMs }
+    if (
+      !Array.isArray(data.itemMs) ||
+      data.itemMs.length !== data.choices.length ||
+      !data.itemMs.every(m => typeof m === 'number' && Number.isFinite(m) && m >= 0)
+    ) return null
+    return { seed: data.seed, choices: data.choices, elapsedMs: data.elapsedMs, itemMs: data.itemMs }
   } catch {
     return null
   }

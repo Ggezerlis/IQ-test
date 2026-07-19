@@ -21,7 +21,9 @@ export default function Timer({ startedAt, softCapMs }: { startedAt: number; sof
     <div
       aria-label={over ? `${fmt(remaining)} over the suggested time` : `${fmt(remaining)} remaining`}
       className={`rounded-md px-2.5 py-1 font-mono text-sm tabular-nums ${
-        over ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700'
+        over
+          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
       }`}
     >
       {over ? `+${fmt(remaining)}` : fmt(remaining)}

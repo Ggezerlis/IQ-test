@@ -9,8 +9,8 @@ export default function ProgressBar({
   const pct = Math.round((position / total) * 100)
   return (
     <div className="w-full">
-      <div className="mb-1 flex items-baseline justify-between text-sm text-slate-600">
-        <span className="font-medium text-slate-800">{sectionLabel}</span>
+      <div className="mb-1 flex items-baseline justify-between text-sm text-slate-600 dark:text-slate-400">
+        <span className="font-medium text-slate-800 dark:text-slate-200">{sectionLabel}</span>
         <span>
           Item {position + 1} of {total}
         </span>
@@ -21,7 +21,7 @@ export default function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={total}
         aria-label={`Item ${position + 1} of ${total}`}
-        className="h-2 w-full overflow-hidden rounded-full bg-slate-200"
+        className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
       >
         <div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${pct}%` }} />
       </div>

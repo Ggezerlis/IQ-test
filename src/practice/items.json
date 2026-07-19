@@ -1,0 +1,665 @@
+[
+  {
+    "item": {
+      "id": "practice-1",
+      "type": "matrix",
+      "difficulty": 1,
+      "prompt": {
+        "kind": "matrix",
+        "cells": [
+          {
+            "count": 2,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 4,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 4,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 2,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 4,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          {
+            "count": 2,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          null
+        ],
+        "describe": "A 3 by 3 grid of figures following one or more pattern rules; the bottom-right cell is missing."
+      },
+      "options": [
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 3,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          "describe": "three medium green-dotted circles"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "hatch"
+          },
+          "describe": "one medium orange-striped circle"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 4,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          "describe": "four medium green-dotted circles"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          "describe": "one medium green-dotted circle"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 5,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          "describe": "five medium green-dotted circles"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 2,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "circle",
+            "fill": "dots"
+          },
+          "describe": "two medium green-dotted circles"
+        }
+      ],
+      "correctIndex": 3,
+      "rulesUsed": [
+        "distribution-of-three (count)"
+      ]
+    },
+    "ruleExplanations": [
+      "Every row and every column contains each count exactly once (4, 1, 2)."
+    ],
+    "answerExplanation": "Applying every rule to the bottom row pins the missing cell down to exactly one figure: one medium green-dotted circle. Option D matches it."
+  },
+  {
+    "item": {
+      "id": "practice-2",
+      "type": "matrix",
+      "difficulty": 2,
+      "prompt": {
+        "kind": "matrix",
+        "cells": [
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 315,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "dots"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 0,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "dots"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 45,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "dots"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 90,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "hatch"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 135,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "hatch"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 180,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "hatch"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 90,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          {
+            "count": 1,
+            "size": 2,
+            "rotation": 135,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          null
+        ],
+        "describe": "A 3 by 3 grid of figures following one or more pattern rules; the bottom-right cell is missing."
+      },
+      "options": [
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 180,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          "describe": "one medium white outlined pentagon; rotated 36 degrees"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 135,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          "describe": "one medium white outlined pentagon; rotated 63 degrees"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 225,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          "describe": "one medium white outlined pentagon; rotated 9 degrees"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 180,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "hatch"
+          },
+          "describe": "one medium orange-striped pentagon; rotated 36 degrees"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 180,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "dots"
+          },
+          "describe": "one medium green-dotted pentagon; rotated 36 degrees"
+        },
+        {
+          "kind": "figure",
+          "figure": {
+            "count": 1,
+            "size": 2,
+            "rotation": 270,
+            "overlay": 0,
+            "decoration": null,
+            "shape": "pentagon",
+            "fill": "outline"
+          },
+          "describe": "one medium white outlined pentagon; rotated 54 degrees"
+        }
+      ],
+      "correctIndex": 0,
+      "rulesUsed": [
+        "progression +45° (rotation)",
+        "constant-in-row (fill)"
+      ]
+    },
+    "ruleExplanations": [
+      "Each cell is rotated 45° further than the cell to its left.",
+      "Within each row the fill stays the same — green-dotted, then orange-striped, then white outlined from top row to bottom."
+    ],
+    "answerExplanation": "Applying every rule to the bottom row pins the missing cell down to exactly one figure: one medium white outlined pentagon; rotated 36 degrees. Option A matches it."
+  },
+  {
+    "item": {
+      "id": "practice-3",
+      "type": "series",
+      "difficulty": 1,
+      "prompt": "15, 22, 29, 36, 43, ?",
+      "options": [
+        "51",
+        "57",
+        "43",
+        "49",
+        "36",
+        "50"
+      ],
+      "correctIndex": 5,
+      "rulesUsed": [
+        "arithmetic +7"
+      ]
+    },
+    "ruleExplanations": [
+      "Each term grows by 7: 15 → 22 → 29 …"
+    ],
+    "answerExplanation": "43 + 7 = 50."
+  },
+  {
+    "item": {
+      "id": "practice-4",
+      "type": "spatial",
+      "difficulty": 1,
+      "prompt": {
+        "kind": "cells",
+        "cells": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ]
+        ],
+        "describe": "Target: a connected figure of 4 squares occupying grid positions (0,0) (0,1) (1,0) (2,0). Exactly one answer option shows this same figure rotated; the others are mirrored or altered."
+      },
+      "options": [
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,1) (0,2) (1,0) (1,1)"
+        },
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,0) (0,1) (0,2) (1,1)"
+        },
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              0
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,0) (1,0) (1,1) (2,0)"
+        },
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,0) (0,1) (0,2) (1,2)"
+        },
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,0) (1,0) (2,0) (2,1)"
+        },
+        {
+          "kind": "cells",
+          "cells": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "describe": "a connected figure of 4 squares occupying grid positions (0,0) (0,1) (0,2) (1,0)"
+        }
+      ],
+      "correctIndex": 3,
+      "rulesUsed": [
+        "mental rotation (90°)",
+        "mirror discrimination",
+        "part-change detection"
+      ]
+    },
+    "ruleExplanations": [
+      "Exactly one option is the target figure turned by a multiple of 90° — here 90°.",
+      "The traps are mirror images: a flipped figure can look right, but no amount of turning produces it.",
+      "Some options also move one square to a different position."
+    ],
+    "answerExplanation": "Option D is the target rotated 90° clockwise — every square lines up."
+  },
+  {
+    "item": {
+      "id": "practice-5",
+      "type": "weights",
+      "difficulty": 1,
+      "prompt": {
+        "kind": "scales",
+        "shapeKinds": [
+          "circle",
+          "square"
+        ],
+        "equations": [
+          {
+            "left": [
+              0,
+              3
+            ],
+            "right": [
+              1,
+              0
+            ]
+          }
+        ],
+        "targetLeft": [
+          1,
+          3
+        ],
+        "describe": "Scale 1 balances: 3 squares weigh the same as 1 circle. Target scale: 1 circle and 3 squares on the left; choose what balances it."
+      },
+      "options": [
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            1,
+            2
+          ],
+          "describe": "1 circle and 2 squares"
+        },
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            3,
+            1
+          ],
+          "describe": "3 circles and 1 square"
+        },
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            0,
+            2
+          ],
+          "describe": "2 squares"
+        },
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            2,
+            0
+          ],
+          "describe": "2 circles"
+        },
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            1,
+            0
+          ],
+          "describe": "1 circle"
+        },
+        {
+          "kind": "shapeset",
+          "shapeKinds": [
+            "circle",
+            "square"
+          ],
+          "counts": [
+            0,
+            4
+          ],
+          "describe": "4 squares"
+        }
+      ],
+      "correctIndex": 3,
+      "rulesUsed": [
+        "linear system: 1 balance, 2 unknown weights"
+      ]
+    },
+    "ruleExplanations": [
+      "Scale 1: 3 squares balance 1 circle.",
+      "One weight assignment consistent with every scale: circle = 3, square = 1 (any consistent assignment gives the same answer)."
+    ],
+    "answerExplanation": "With those weights the left pan (1 circle and 3 squares) totals 6; option D (2 circles) totals 6 too — and that balance follows from the scales alone, no matter which consistent weights you pick."
+  }
+]

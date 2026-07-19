@@ -4,7 +4,7 @@ export default function Disclaimer() {
   return (
     <div
       role="note"
-      className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900"
+      className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
     >
       <strong>{APP_NAME} is for entertainment.</strong> It gives a rough estimate of
       pattern-recognition ability — it is not a clinical assessment, and no online test can

@@ -3,6 +3,7 @@ import { generateSeriesItem } from '../generators/series'
 import { generateSpatialItem } from '../generators/spatial'
 import { generateWeightsItem } from '../generators/weights'
 import { APP_NAME } from '../lib/config'
+import type { HistoryEntry } from '../lib/history'
 import type { Figure, SVGSpec } from '../lib/types'
 import Disclaimer from '../components/Disclaimer'
 import { describeFigure } from '../render/shapes'
@@ -33,7 +34,7 @@ const FAQS = [
   },
   {
     q: 'Do you store my answers anywhere?',
-    a: 'No account and no server. The test runs entirely in your browser — a share link just encodes your seed and answers directly in the URL.',
+    a: 'No account and no server. The test runs entirely in your browser — a share link just encodes your seed and answers directly in the URL, and your history lives in this browser only.',
   },
   {
     q: 'Will I get the same puzzles if I take it again?',
@@ -47,36 +48,84 @@ const FAQS = [
 
 function FaqItem({ q, a }: { q: string; a: string }) {
   return (
-    <details className="rounded-lg border border-slate-200 bg-white px-4 py-3">
-      <summary className="cursor-pointer list-none font-medium text-slate-900 [&::-webkit-details-marker]:hidden">
+    <details className="rounded-lg border border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
+      <summary className="cursor-pointer list-none font-medium text-slate-900 dark:text-slate-100 [&::-webkit-details-marker]:hidden">
         {q}
       </summary>
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">{a}</p>
+      <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{a}</p>
     </details>
   )
 }
 
+function HistoryList({
+  entries, onOpen, onClear,
+}: {
+  entries: HistoryEntry[]
+  onOpen: (entry: HistoryEntry) => void
+  onClear: () => void
+}) {
+  return (
+    <section aria-label="Previous runs" className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100">Your previous runs</h2>
+        <button
+          type="button"
+          onClick={onClear}
+          className="text-xs text-slate-400 underline-offset-2 hover:underline dark:text-slate-500"
+        >
+          Clear history
+        </button>
+      </div>
+      <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Stored in this browser only.</p>
+      <ul className="flex flex-col gap-1.5">
+        {entries.map(e => (
+          <li key={`${e.seed}-${e.finishedAt}`}>
+            <button
+              type="button"
+              onClick={() => onOpen(e)}
+              className="flex w-full flex-wrap items-baseline gap-x-3 gap-y-0.5 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm hover:border-blue-400 dark:border-slate-700 dark:hover:border-blue-500"
+            >
+              <span className="font-medium text-blue-700 dark:text-blue-400">{e.summary.band}</span>
+              <span className="text-slate-700 dark:text-slate-300">
+                {e.summary.correct}/30 · IQ-eq. {e.summary.iqLo}–{e.summary.iqHi}
+              </span>
+              <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">
+                {new Date(e.finishedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 export default function Home({
-  onStart, challenge = false, resumeAt, onResume, onDiscard,
+  onStart, onPractice, challenge = false, resumeAt, onResume, onDiscard,
+  history = [], onOpenHistoryEntry, onClearHistory,
 }: {
   onStart: () => void
+  onPractice: () => void
   challenge?: boolean
   /** 1-based item number an interrupted test would continue at. */
   resumeAt?: number
   onResume?: () => void
   onDiscard?: () => void
+  history?: HistoryEntry[]
+  onOpenHistoryEntry?: (entry: HistoryEntry) => void
+  onClearHistory?: () => void
 }) {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       <section className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-14">
         {challenge && (
-          <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+          <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
             <strong>Challenge accepted?</strong> This link carries a seed — you'll get the exact
             same 30 puzzles as the person who sent it.
           </div>
         )}
         {resumeAt !== undefined && onResume && (
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900">
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">
             <span className="min-w-0 flex-1">
               <strong>Test in progress.</strong> You were on item {resumeAt} of 30 — your answers
               and the clock are saved in this browser.
@@ -92,7 +141,7 @@ export default function Home({
               <button
                 type="button"
                 onClick={onDiscard}
-                className="rounded-lg border border-blue-300 px-4 py-1.5 font-medium text-blue-800 hover:bg-blue-100"
+                className="rounded-lg border border-blue-300 px-4 py-1.5 font-medium text-blue-800 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-200 dark:hover:bg-blue-900"
               >
                 Discard
               </button>
@@ -100,32 +149,44 @@ export default function Home({
           </div>
         )}
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">{APP_NAME}</h1>
-          <p className="mt-2 text-lg text-slate-600">
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{APP_NAME}</h1>
+          <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">
             A free pattern-reasoning test. 30 items, about 20 minutes. Your score is shown
             immediately — no email, no account, no payment, ever.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onStart}
-          className="w-full rounded-xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 sm:w-fit"
-        >
-          Start the test
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={onStart}
+            className="rounded-xl bg-blue-600 px-6 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+          >
+            Start the test
+          </button>
+          <button
+            type="button"
+            onClick={onPractice}
+            className="rounded-xl border-2 border-blue-600 px-6 py-4 text-lg font-semibold text-blue-700 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
+          >
+            Practice first — 5 quick questions
+          </button>
+        </div>
         <Disclaimer />
+        {history.length > 0 && onOpenHistoryEntry && onClearHistory && (
+          <HistoryList entries={history} onOpen={onOpenHistoryEntry} onClear={onClearHistory} />
+        )}
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50">
+      <section className="border-t border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-2xl px-4 py-14">
-          <h2 className="text-2xl font-bold text-slate-900">What you'll solve</h2>
-          <p className="mt-2 text-slate-600">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">What you'll solve</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             Four sections, each generated fresh from published relation rules — these previews
             are real generator output, not mockups.
           </p>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {SECTIONS.map(s => (
-              <li key={s.name} className="rounded-xl border border-slate-200 bg-white p-4">
+              <li key={s.name} className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
                 <div className="flex items-center gap-3">
                   {s.preview && (
                     <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-50">
@@ -133,21 +194,21 @@ export default function Home({
                     </div>
                   )}
                   <div className="min-w-0">
-                    <span className="block font-medium text-slate-900">{s.name}</span>
-                    <span className="text-sm text-slate-600">{s.detail}</span>
+                    <span className="block font-medium text-slate-900 dark:text-slate-100">{s.name}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">{s.detail}</span>
                   </div>
                 </div>
-                {s.sample && <p className="mt-2 text-xs tabular-nums text-slate-500">e.g. {s.sample}</p>}
+                {s.sample && <p className="mt-2 text-xs tabular-nums text-slate-500 dark:text-slate-400">e.g. {s.sample}</p>}
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-white">
+      <section className="border-t border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-2xl px-4 py-14">
-          <h2 className="text-2xl font-bold text-slate-900">See a real item</h2>
-          <p className="mt-2 text-slate-600">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">See a real item</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             This is an actual generated puzzle, not a mockup — the same code that builds it built
             your test.
           </p>
@@ -160,7 +221,7 @@ export default function Home({
             />
             <div className="grid flex-1 grid-cols-3 gap-2">
               {abstractDemo.item.options.map((opt, i) => (
-                <div key={i} className="rounded-lg border border-slate-200 bg-white p-1">
+                <div key={i} className="rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
                   <SvgItem
                     spec={opt as SVGSpec}
                     uid={`home-demo-opt-${i}`}
@@ -170,34 +231,34 @@ export default function Home({
               ))}
             </div>
           </div>
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
             We won't spoil the answer here — every item gets a full explanation on your results
             page.
           </p>
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50">
+      <section className="border-t border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-2xl px-4 py-14">
-          <h2 className="text-2xl font-bold text-slate-900">How it's scored</h2>
-          <ul className="mt-4 flex flex-col gap-3 text-slate-700">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">How it's scored</h2>
+          <ul className="mt-4 flex flex-col gap-3 text-slate-700 dark:text-slate-300">
             <li>
-              <strong className="text-slate-900">Adaptive difficulty.</strong> You start at a
+              <strong className="text-slate-900 dark:text-slate-100">Adaptive difficulty.</strong> You start at a
               medium level; each correct answer raises the bar, each miss lowers it, so you're
               tested near your actual ceiling.
             </li>
             <li>
-              <strong className="text-slate-900">An honestly-labeled estimate.</strong> Your raw
+              <strong className="text-slate-900 dark:text-slate-100">An honestly-labeled estimate.</strong> Your raw
               score maps to a percentile through an assumed normal distribution — not a norming
               study — and the results page says so.
             </li>
             <li>
-              <strong className="text-slate-900">A range, never a point.</strong> The
+              <strong className="text-slate-900 dark:text-slate-100">A range, never a point.</strong> The
               IQ-equivalent is shown as a range, because a 20-minute test can't responsibly claim
               more precision than that.
             </li>
             <li>
-              <strong className="text-slate-900">Every item explained.</strong> Afterward, open
+              <strong className="text-slate-900 dark:text-slate-100">Every item explained.</strong> Afterward, open
               any of the 30 items to see the rule, why the right answer is right, and why your
               pick was wrong.
             </li>
@@ -205,19 +266,19 @@ export default function Home({
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-white">
+      <section className="border-t border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-2xl px-4 py-14">
-          <h2 className="text-2xl font-bold text-slate-900">Questions</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Questions</h2>
           <div className="mt-4 flex flex-col gap-2">
             {FAQS.map(f => <FaqItem key={f.q} q={f.q} a={f.a} />)}
           </div>
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50">
+      <section className="border-t border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
         <div className="mx-auto max-w-2xl px-4 py-14 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">Ready?</h2>
-          <p className="mt-2 text-slate-600">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ready?</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             30 items, about 20 minutes, your score the moment you finish.
           </p>
           <button
@@ -227,7 +288,7 @@ export default function Home({
           >
             Start the test
           </button>
-          <p className="mt-4 text-xs text-slate-500">Entertainment only — not a clinical assessment.</p>
+          <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Entertainment only — not a clinical assessment.</p>
         </div>
       </section>
     </div>

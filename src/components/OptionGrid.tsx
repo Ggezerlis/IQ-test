@@ -8,18 +8,22 @@ const COLS = 3
  * The six answer options as a radiogroup with full keyboard support:
  * arrow keys move the selection (left/right steps, up/down jumps a row),
  * digits 1–6 select directly. Enter is handled by the parent (confirm).
+ * When `reveal` is set (practice feedback) the grid is read-only and marks
+ * the correct option green and a wrong pick red.
  */
 export default function OptionGrid({
-  options, uid, selected, onSelect,
+  options, uid, selected, onSelect, reveal,
 }: {
   options: (SVGSpec | string)[]
   uid: string
   selected: number | null
   onSelect: (i: number) => void
+  reveal?: { correctIndex: number; chosenIndex: number | null }
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
+    if (reveal) return
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return
       const n = options.length
@@ -41,7 +45,7 @@ export default function OptionGrid({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [options.length, selected, onSelect])
+  }, [options.length, selected, onSelect, reveal])
 
   return (
     <div role="radiogroup" aria-label="Answer options" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -49,25 +53,41 @@ export default function OptionGrid({
         const letter = String.fromCharCode(65 + i)
         const isSel = selected === i
         const label = typeof opt === 'string' ? `Option ${letter}: ${opt}` : `Option ${letter}: ${opt.describe}`
+        let border = isSel
+          ? 'border-blue-600 ring-2 ring-blue-200 dark:ring-blue-900'
+          : 'border-slate-200 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-500'
+        let labelColor = isSel ? 'text-blue-700 dark:text-blue-400' : 'text-slate-500 dark:text-slate-400'
+        if (reveal) {
+          if (i === reveal.correctIndex) {
+            border = 'border-green-600 ring-2 ring-green-200 dark:ring-green-900'
+            labelColor = 'text-green-700 dark:text-green-400'
+          } else if (i === reveal.chosenIndex) {
+            border = 'border-red-500 ring-2 ring-red-200 dark:ring-red-900'
+            labelColor = 'text-red-600 dark:text-red-400'
+          } else {
+            border = 'border-slate-200 opacity-60 dark:border-slate-700'
+          }
+        }
         return (
           <button
             key={i}
             ref={el => { refs.current[i] = el }}
             type="button"
             role="radio"
-            aria-checked={isSel}
+            aria-checked={reveal ? i === reveal.chosenIndex : isSel}
             aria-label={label}
             tabIndex={isSel || (selected === null && i === 0) ? 0 : -1}
-            onClick={() => onSelect(i)}
-            className={`rounded-xl border-2 bg-white p-1.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-              isSel ? 'border-blue-600 ring-2 ring-blue-200' : 'border-slate-200 hover:border-slate-400'
-            }`}
+            disabled={!!reveal}
+            onClick={() => !reveal && onSelect(i)}
+            className={`rounded-xl border-2 bg-white p-1.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 ${border}`}
           >
-            <span className={`mb-0.5 block px-1 text-xs font-semibold ${isSel ? 'text-blue-700' : 'text-slate-500'}`}>
+            <span className={`mb-0.5 block px-1 text-xs font-semibold ${labelColor}`}>
               {letter}
+              {reveal && i === reveal.correctIndex ? ' ✓ correct' : ''}
+              {reveal && i === reveal.chosenIndex && i !== reveal.correctIndex ? ' ✗ your pick' : ''}
             </span>
             {typeof opt === 'string' ? (
-              <span className="block py-3 text-center text-xl tabular-nums text-slate-900">{opt}</span>
+              <span className="block py-3 text-center text-xl tabular-nums text-slate-900 dark:text-slate-100">{opt}</span>
             ) : (
               <SvgItem spec={opt} uid={`${uid}o${i}`} title={`Option ${letter}`} />
             )}

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "gallery": "tsx scripts/gallery.ts",
     "og": "tsx scripts/og.ts",
+    "make-practice": "tsx scripts/make-practice.ts",
     "e2e": "node e2e/run.mjs"
   },
   "dependencies": {

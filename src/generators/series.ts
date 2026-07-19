@@ -224,6 +224,85 @@ export function wrongContinuations(recipe: SeriesRecipe, terms: number[]): Wrong
   }
 }
 
+/**
+ * Ambiguity guard. A number-series item is broken if a distractor is ALSO a
+ * lawful continuation of the shown terms under some other rule family — two
+ * defensible answers. This returns every continuation a reasonable solver
+ * could lawfully derive from the shown terms:
+ *
+ *   constant difference, constant integer ratio, constant second difference,
+ *   sum-of-previous-two, alternating step pattern (each parity class of
+ *   steps constant-difference or constant-ratio, ≥2 steps of evidence each),
+ *   and interleaved arithmetic threads (≥3 terms of evidence per thread).
+ *
+ * The generator rejects any distractor in this set; the true answer must be
+ * in it (that's its own family).
+ */
+export function lawfulContinuations(shown: number[]): Set<number> {
+  const out = new Set<number>()
+  const n = shown.length
+  const last = shown[n - 1]
+  const diffs = shown.slice(1).map((t, i) => t - shown[i])
+
+  if (diffs.every(d => d === diffs[0])) out.add(last + diffs[0])
+
+  if (shown.every(t => t !== 0)) {
+    const r = shown[1] / shown[0]
+    if (Number.isInteger(r) && r !== 0 && shown.slice(1).every((t, i) => t === shown[i] * r)) {
+      out.add(last * r)
+    }
+  }
+
+  const sdiffs = diffs.slice(1).map((d, i) => d - diffs[i])
+  if (sdiffs.length >= 2 && sdiffs.every(e => e === sdiffs[0])) {
+    out.add(last + diffs[diffs.length - 1] + sdiffs[0])
+  }
+
+  if (n >= 4 && shown.slice(2).every((t, i) => t === shown[i] + shown[i + 1])) {
+    out.add(last + shown[n - 2])
+  }
+
+  // Alternating steps: split steps by parity; each class must be uniformly
+  // constant-difference or constant-ratio with at least 2 steps of evidence.
+  const stepClass = (parity: 0 | 1): { diff?: number; ratio?: number } | null => {
+    const idx = []
+    for (let i = parity; i < n - 1; i += 2) idx.push(i)
+    if (idx.length < 2) return null
+    const ds = idx.map(i => shown[i + 1] - shown[i])
+    if (ds.every(d => d === ds[0])) return { diff: ds[0] }
+    if (idx.every(i => shown[i] !== 0 && Number.isInteger(shown[i + 1] / shown[i]))) {
+      const rs = idx.map(i => shown[i + 1] / shown[i])
+      if (rs.every(r => r === rs[0]) && rs[0] !== 0) return { ratio: rs[0] }
+    }
+    return null
+  }
+  const nextParity = ((n - 1) % 2) as 0 | 1
+  const nextClass = stepClass(nextParity)
+  const otherClass = stepClass(((n) % 2) as 0 | 1)
+  if (nextClass && otherClass) {
+    if (nextClass.diff !== undefined) out.add(last + nextClass.diff)
+    if (nextClass.ratio !== undefined) out.add(last * nextClass.ratio)
+  }
+
+  // Interleaved arithmetic threads; only claimed with ≥3 terms per thread.
+  if (n >= 6) {
+    const thread = (start: number) => {
+      const t = []
+      for (let i = start; i < n; i += 2) t.push(shown[i])
+      return t
+    }
+    const nextThread = thread(n % 2)
+    const otherThread = thread((n + 1) % 2)
+    const constDiff = (t: number[]) =>
+      t.length >= 3 && t.slice(1).every((v, i) => v - t[i] === t[1] - t[0])
+    if (constDiff(nextThread) && constDiff(otherThread)) {
+      out.add(nextThread[nextThread.length - 1] + (nextThread[1] - nextThread[0]))
+    }
+  }
+
+  return out
+}
+
 export interface SeriesGeneration {
   item: Item
   recipe: SeriesRecipe
@@ -239,11 +318,16 @@ export function generateSeriesItem(difficulty: Difficulty, seed: number): Series
     if (terms.some(t => !Number.isInteger(t) || Math.abs(t) > 9999)) continue
     const answer = terms[terms.length - 1]
 
+    // No distractor may itself be a lawful continuation under another rule
+    // family — that would make two answers defensible.
+    const lawful = lawfulContinuations(terms.slice(0, -1))
+    if (!lawful.has(answer)) continue // sanity: the answer is always lawful
+
     const distractors: number[] = []
     const seen = new Set<number>([answer])
     for (const { value } of wrongContinuations(recipe, terms)) {
       if (distractors.length >= 5) break
-      if (!Number.isInteger(value) || Math.abs(value) > 9999 || seen.has(value)) continue
+      if (!Number.isInteger(value) || Math.abs(value) > 9999 || seen.has(value) || lawful.has(value)) continue
       seen.add(value)
       distractors.push(value)
     }
@@ -251,7 +335,7 @@ export function generateSeriesItem(difficulty: Difficulty, seed: number): Series
     for (const delta of [1, -1, 2, -2, 3, -3, 4, -4]) {
       if (distractors.length >= 5) break
       const c = answer + delta
-      if (seen.has(c)) continue
+      if (seen.has(c) || lawful.has(c)) continue
       seen.add(c)
       distractors.push(c)
     }

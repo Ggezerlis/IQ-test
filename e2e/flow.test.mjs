@@ -1,9 +1,15 @@
-// Full test flow: landing page → 30 items (keyboard and mouse) → results
-// page with 30 explained cards; mobile keeps the disclaimer above the fold.
+// Full test flow: landing page → section intros → 30 items (keyboard and
+// mouse) → results page with 30 explained cards and per-item timings;
+// mobile keeps the disclaimer above the fold.
 import { assert } from './helpers.mjs'
 
-async function answerAll(page, pick) {
+const SECTION_STARTS = [0, 12, 18, 24]
+
+export async function answerAll(page, pick) {
   for (let i = 0; i < 30; i++) {
+    if (SECTION_STARTS.includes(i)) {
+      await page.getByRole('button', { name: 'Begin' }).click()
+    }
     await page.waitForSelector(`text=Item ${i + 1} of 30`)
     if (pick === 'mixed' && i % 2 === 0) {
       await page.keyboard.press(String((i % 6) + 1))
@@ -23,12 +29,14 @@ export default async function flowTest(browser, baseUrl) {
   for (const text of ['What you\'ll solve', 'How it\'s scored', 'for entertainment']) {
     assert(await page.locator(`text=${text}`).first().isVisible(), `landing page missing: ${text}`)
   }
-  assert((await page.getByRole('button', { name: 'Start the test' }).count()) === 2, 'expected 2 start CTAs')
-
   await page.getByRole('button', { name: 'Start the test' }).first().click()
 
-  // Arrow-key navigation works.
+  // First section intro appears, then item 1.
+  await page.waitForSelector('text=Section 1 of 4')
+  await page.getByRole('button', { name: 'Begin' }).click()
   await page.waitForSelector('text=Item 1 of 30')
+
+  // Arrow-key navigation works.
   await page.keyboard.press('1')
   await page.keyboard.press('ArrowRight')
   const label = await page.locator('[role=radio][aria-checked=true]').getAttribute('aria-label')
@@ -38,13 +46,25 @@ export default async function flowTest(browser, baseUrl) {
   const confirmBox = await page.getByRole('button', { name: 'Confirm' }).boundingBox()
   assert(confirmBox && confirmBox.y + confirmBox.height <= 950 + 1, 'confirm bar not within viewport')
 
-  await answerAll(page, 'mixed')
+  // Answer the rest (intro at item 1 already dismissed above).
+  for (let i = 0; i < 30; i++) {
+    if (i > 0 && SECTION_STARTS.includes(i)) {
+      await page.waitForSelector(`text=Section ${SECTION_STARTS.indexOf(i) + 1} of 4`)
+      await page.getByRole('button', { name: 'Begin' }).click()
+    }
+    await page.waitForSelector(`text=Item ${i + 1} of 30`)
+    await page.locator('[role=radio]').nth(i % 6).click()
+    await page.getByRole('button', { name: 'Confirm' }).click()
+  }
 
   await page.waitForSelector('text=Your results')
   for (const text of ['for entertainment', 'IQ-equivalent ≈', 'assumed', 'By section', 'Every item, explained']) {
     assert(await page.locator(`text=${text}`).first().isVisible(), `results missing: ${text}`)
   }
   assert((await page.locator('details').count()) === 30, 'expected 30 review cards')
+
+  // Per-item timings are shown, exactly one card marked longest.
+  assert((await page.locator('text=longest').count()) === 1, 'expected exactly one longest-time marker')
 
   const wrong = page.locator('details', { has: page.locator('text=✗') }).first()
   await wrong.click()
@@ -63,5 +83,5 @@ export default async function flowTest(browser, baseUrl) {
   assert(box && box.y + 40 <= 844, `disclaimer below the fold on mobile: y=${box?.y}`)
   await mobile.close()
 
-  return 'flow: landing, 30 items, results, explanations, mobile fold'
+  return 'flow: landing, intros, 30 items, results, timings, mobile fold'
 }
