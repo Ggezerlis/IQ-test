@@ -17,7 +17,7 @@ import type { Difficulty, Figure, Item } from '../lib/types'
 import { canonicalRotation, describeFigure, fillWord } from '../render/shapes'
 import { difficultyLadder, INITIAL_DIFFICULTY, PINNED_ITEMS, nextDifficulty } from './adaptive'
 import { scoreTest, type AnswerLike, type ScoreReport } from './scoring'
-import { itemSeed, TEST_PLAN, type Section } from './testPlan'
+import { safeItemSeed, TEST_PLAN, type Section } from './testPlan'
 
 export interface ItemReview {
   position: number
@@ -228,7 +228,8 @@ export function replayTest(seed: number, choices: number[]): Replay {
 
   choices.forEach((chosen, position) => {
     const slot = TEST_PLAN[position]
-    const s = itemSeed(seed, position)
+    // Same bad-seed fallback the live test uses, so replays stay identical.
+    const s = safeItemSeed(seed, position, difficulty)
     let item: Item
     let parts: Pick<ItemReview, 'ruleExplanations' | 'answerExplanation' | 'distractorExplanation'>
     switch (slot.type) {

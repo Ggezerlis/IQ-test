@@ -43,13 +43,38 @@ export function itemSeed(testSeed: number, position: number): number {
   return ((testSeed >>> 0) + position * 101) >>> 0
 }
 
-export function itemAt(testSeed: number, position: number, difficulty: Difficulty): Item {
-  const slot = TEST_PLAN[position]
-  const seed = itemSeed(testSeed, position)
-  switch (slot.type) {
+function generate(type: ItemType, difficulty: Difficulty, seed: number): Item {
+  switch (type) {
     case 'matrix': return matrixItem(difficulty, seed)
     case 'series': return seriesItem(difficulty, seed)
     case 'spatial': return spatialItem(difficulty, seed)
     case 'weights': return weightsItem(difficulty, seed)
   }
+}
+
+/**
+ * The seed actually used at this position: normally itemSeed, but if a
+ * generator throws on it (an edge case the retry budget inside the
+ * generator couldn't solve), deterministically step to the next variant.
+ * Deterministic fallback keeps share links and replays consistent — every
+ * client that hits the same bad seed lands on the same replacement.
+ */
+export function safeItemSeed(testSeed: number, position: number, difficulty: Difficulty): number {
+  const base = itemSeed(testSeed, position)
+  for (let k = 0; k < 10; k++) {
+    const seed = (base + k * 0x9e3779b1) >>> 0
+    try {
+      generate(TEST_PLAN[position].type, difficulty, seed)
+      return seed
+    } catch {
+      // try the next variant
+    }
+  }
+  // Ten dead seeds in a row would mean a systemic generator bug; the
+  // error boundary is the right place for that.
+  throw new Error(`no generatable item at position ${position}, difficulty ${difficulty}`)
+}
+
+export function itemAt(testSeed: number, position: number, difficulty: Difficulty): Item {
+  return generate(TEST_PLAN[position].type, difficulty, safeItemSeed(testSeed, position, difficulty))
 }

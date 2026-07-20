@@ -42,6 +42,14 @@ export default async function featuresTest(browser, baseUrl) {
     await t.getByRole('button', { name: 'Confirm' }).click()
   }
   await t.waitForSelector('text=Your results')
+
+  // --- Result card: the PNG download really happens, drawn client-side.
+  const downloadPromise = t.waitForEvent('download')
+  await t.getByRole('button', { name: 'Save result card' }).click()
+  const download = await downloadPromise
+  assert(download.suggestedFilename() === 'freeiq-result.png',
+    `unexpected card filename: ${download.suggestedFilename()}`)
+
   await t.getByRole('button', { name: 'Take a fresh test' }).click()
   await t.waitForSelector('text=Your previous runs')
   const entries = t.locator('section[aria-label="Previous runs"] ul > li')

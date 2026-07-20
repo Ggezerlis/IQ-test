@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { difficultyLadder } from './engine/adaptive'
 import { replayTest } from './engine/explain'
 import { scoreTest } from './engine/scoring'
@@ -7,12 +7,16 @@ import type { Difficulty, ItemType } from './lib/types'
 import { addHistoryEntry, clearHistory, loadHistory, type HistoryEntry } from './lib/history'
 import { clearSession, loadSession, saveSession } from './lib/session'
 import { encodeShare, parseShare } from './lib/share'
+import { track } from './lib/analytics'
 import { useScrollTop } from './lib/useScrollTop'
 import Home from './screens/Home'
-import Practice from './screens/Practice'
 import Question from './screens/Question'
-import Results from './screens/Results'
 import SectionIntro from './screens/SectionIntro'
+
+// Split the screens a first-time visitor doesn't need at load: the results
+// page (explanation engine) and the practice round (frozen item JSON).
+const Results = lazy(() => import('./screens/Results'))
+const Practice = lazy(() => import('./screens/Practice'))
 
 const SOFT_CAP_MS = 20 * 60 * 1000
 
@@ -104,6 +108,7 @@ export default function App() {
   }, [preview, phase, position])
 
   const startTest = (seed?: number) => {
+    track('test_start')
     clearSession()
     setSaved(null)
     setPhase({
@@ -149,7 +154,10 @@ export default function App() {
           clearHistory()
           setHistory([])
         }}
-        onPractice={() => setPhase({ name: 'practice' })}
+        onPractice={() => {
+          track('practice_start')
+          setPhase({ name: 'practice' })
+        }}
         onResume={
           saved
             ? () => {
@@ -187,7 +195,11 @@ export default function App() {
   }
 
   if (phase.name === 'practice') {
-    return <Practice onExit={startNow => (startNow ? startTest() : setPhase({ name: 'home' }))} />
+    return (
+      <Suspense fallback={null}>
+        <Practice onExit={startNow => (startNow ? startTest() : setPhase({ name: 'home' }))} />
+      </Suspense>
+    )
   }
 
   if (phase.name === 'test' && phase.pausedAt !== undefined) {
@@ -232,6 +244,7 @@ export default function App() {
         },
       ]
       if (answers.length >= TOTAL_ITEMS) {
+        track('test_complete')
         const choices = answers.map(a => a.optionIndex)
         const itemMs = answers.map(a => a.ms)
         const elapsedMs = now - phase.startedAt
@@ -264,11 +277,13 @@ export default function App() {
           elapsedMs: now - phase.startedAt,
           itemMs: answers.map(a => a.ms),
         })
+        const intro = isSectionStart(answers.length)
+        if (intro) track('section_reached', [0, 12, 18, 24].indexOf(answers.length) + 1)
         setPhase({
           ...phase,
           answers,
           itemStartedAt: now,
-          intro: isSectionStart(answers.length),
+          intro,
         })
       }
     }
@@ -300,17 +315,19 @@ export default function App() {
 
   if (phase.name === 'finished') {
     return (
-      <Results
-        seed={phase.seed}
-        choices={phase.choices}
-        elapsedMs={phase.elapsedMs}
-        timings={phase.itemMs}
-        onRestart={() => {
-          window.history.replaceState(null, '', window.location.pathname)
-          setHistory(loadHistory())
-          setPhase({ name: 'home' })
-        }}
-      />
+      <Suspense fallback={null}>
+        <Results
+          seed={phase.seed}
+          choices={phase.choices}
+          elapsedMs={phase.elapsedMs}
+          timings={phase.itemMs}
+          onRestart={() => {
+            window.history.replaceState(null, '', window.location.pathname)
+            setHistory(loadHistory())
+            setPhase({ name: 'home' })
+          }}
+        />
+      </Suspense>
     )
   }
 

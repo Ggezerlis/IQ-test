@@ -2,7 +2,10 @@ import { useMemo, useState } from 'react'
 import { useScrollTop } from '../lib/useScrollTop'
 import Disclaimer from '../components/Disclaimer'
 import { replayTest, type ItemReview } from '../engine/explain'
+import type { ScoreReport } from '../engine/scoring'
 import { SECTION_LABEL } from '../engine/testPlan'
+import { track } from '../lib/analytics'
+import { resultCardBlob } from '../lib/resultCard'
 import { encodeShare } from '../lib/share'
 import SvgItem from '../render/SvgItem'
 
@@ -86,6 +89,68 @@ function ReviewCard({ review, timeMs, slowest }: { review: ItemReview; timeMs?: 
   )
 }
 
+function ResultCardRow({ report, correct }: { report: ScoreReport; correct: number }) {
+  const [busy, setBusy] = useState(false)
+  const canShareFiles = typeof navigator.canShare === 'function'
+
+  const withBlob = async (use: (blob: Blob) => Promise<void> | void) => {
+    track('share_used')
+    setBusy(true)
+    try {
+      await use(await resultCardBlob(report, correct))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline gap-2">
+        <span className="text-sm font-medium text-slate-800 dark:text-slate-200">Result card</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">
+          a PNG of your score band — made right here in your browser
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            withBlob(blob => {
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'freeiq-result.png'
+              a.click()
+              setTimeout(() => URL.revokeObjectURL(url), 5000)
+            })
+          }
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          Save result card
+        </button>
+        {canShareFiles && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() =>
+              withBlob(async blob => {
+                const file = new File([blob], 'freeiq-result.png', { type: 'image/png' })
+                if (navigator.canShare({ files: [file] })) {
+                  await navigator.share({ files: [file], title: 'My FreeIQ result' }).catch(() => {})
+                }
+              })
+            }
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            Share…
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ShareRow({ label, note, url }: { label: string; note: string; url: string }) {
   const [copied, setCopied] = useState(false)
   return (
@@ -105,6 +170,7 @@ function ShareRow({ label, note, url }: { label: string; note: string; url: stri
         <button
           type="button"
           onClick={() => {
+            track('share_used')
             navigator.clipboard?.writeText(url).then(() => {
               setCopied(true)
               setTimeout(() => setCopied(false), 2000)
@@ -207,6 +273,7 @@ export default function Results({
           note="opens this page — including all answers and explanations"
           url={`${window.location.origin}${window.location.pathname}${encodeShare({ seed, choices })}`}
         />
+        <ResultCardRow report={report} correct={correct} />
       </section>
 
       <div className="mt-8 flex gap-3">

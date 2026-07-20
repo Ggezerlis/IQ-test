@@ -32,7 +32,17 @@ npm run build      # typecheck + production build
   Colors are Okabe–Ito and always paired with a fill pattern (colorblind-safe).
 - Share links encode seed + answers in URL params (`?s=…&a=…`); no data leaves the browser.
 
+## Analytics (off by default)
+
+There is no tracking in default builds: no network call is ever made. To get
+anonymous funnel visibility (test started / section reached / completed /
+share used — no IDs, no cookies, no answers), set `VITE_ANALYTICS_URL` at
+build time to a collection endpoint you control (a Cloudflare Worker,
+GoatCounter, Plausible's events API, …). See `src/lib/analytics.ts`.
+
 ## Deploy
 
 Pushing to `main` builds and deploys to GitHub Pages via
 `.github/workflows/deploy.yml` (enable Pages → Source: GitHub Actions in repo settings).
+The workflow injects the absolute site URL into OG tags, JSON-LD, robots.txt,
+and sitemap.xml.

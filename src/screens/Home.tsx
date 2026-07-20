@@ -79,7 +79,7 @@ function HistoryList({
       </div>
       <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Stored in this browser only.</p>
       <ul className="flex flex-col gap-1.5">
-        {entries.map(e => (
+        {entries.slice(0, 5).map(e => (
           <li key={`${e.seed}-${e.finishedAt}`}>
             <button
               type="button"
@@ -97,6 +97,11 @@ function HistoryList({
           </li>
         ))}
       </ul>
+      {entries.length > 5 && (
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+          Showing the latest 5 of {entries.length} runs.
+        </p>
+      )}
     </section>
   )
 }
