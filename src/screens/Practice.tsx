@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useScrollTop } from '../lib/useScrollTop'
 import OptionGrid from '../components/OptionGrid'
 import type { ItemType } from '../lib/types'
 import { PRACTICE_ITEMS } from '../practice'
@@ -21,6 +22,8 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
   const [selected, setSelected] = useState<number | null>(null)
   const [confirmed, setConfirmed] = useState(false)
 
+  // Back to the top on every question change.
+  useScrollTop(index)
   const entry = PRACTICE_ITEMS[index]
   const item = entry.item
   const last = index === PRACTICE_ITEMS.length - 1
@@ -46,7 +49,7 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
 
   return (
     <>
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-40 pt-5">
+      <main key={item.id} className="screen-enter mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-40 pt-5">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
             Practice · question {index + 1} of {PRACTICE_ITEMS.length}
@@ -81,7 +84,7 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
             />
             {confirmed && (
               <div
-                className={`rounded-xl border p-4 text-sm leading-relaxed ${
+                className={`rise-in rounded-xl border p-4 text-sm leading-relaxed ${
                   correct
                     ? 'border-green-300 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-200'
                     : 'border-red-300 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200'
@@ -102,7 +105,7 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
         </div>
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+      <footer className="footer-enter fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
         <div
           className="mx-auto flex max-w-4xl flex-col gap-2 px-4 py-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
@@ -114,7 +117,7 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
             <button
               type="button"
               onClick={advance}
-              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+              className="btn-press w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
             >
               {last ? 'Start the real test' : 'Next question'}
             </button>
@@ -123,7 +126,7 @@ export default function Practice({ onExit }: { onExit: (startTest: boolean) => v
               type="button"
               disabled={selected === null}
               onClick={() => selected !== null && setConfirmed(true)}
-              className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+              className="btn-press w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
             >
               Check answer
             </button>

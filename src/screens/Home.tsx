@@ -6,6 +6,7 @@ import { APP_NAME } from '../lib/config'
 import type { HistoryEntry } from '../lib/history'
 import type { Figure, SVGSpec } from '../lib/types'
 import Disclaimer from '../components/Disclaimer'
+import { useScrollTop } from '../lib/useScrollTop'
 import { describeFigure } from '../render/shapes'
 import SvgItem from '../render/SvgItem'
 
@@ -115,8 +116,9 @@ export default function Home({
   onOpenHistoryEntry?: (entry: HistoryEntry) => void
   onClearHistory?: () => void
 }) {
+  useScrollTop()
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="screen-enter min-h-screen bg-white dark:bg-slate-950">
       <section className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-14">
         {challenge && (
           <div className="rounded-lg border border-blue-300 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200">

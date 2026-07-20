@@ -79,7 +79,8 @@ export default function OptionGrid({
             tabIndex={isSel || (selected === null && i === 0) ? 0 : -1}
             disabled={!!reveal}
             onClick={() => !reveal && onSelect(i)}
-            className={`rounded-xl border-2 bg-white p-1.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 ${border}`}
+            style={{ animationDelay: `${i * 45}ms` }}
+            className={`rise-in rounded-xl border-2 bg-white p-1.5 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:bg-slate-800 ${border}`}
           >
             <span className={`mb-0.5 block px-1 text-xs font-semibold ${labelColor}`}>
               {letter}

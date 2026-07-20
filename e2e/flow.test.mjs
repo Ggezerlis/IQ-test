@@ -42,7 +42,8 @@ export default async function flowTest(browser, baseUrl) {
   const label = await page.locator('[role=radio][aria-checked=true]').getAttribute('aria-label')
   assert(label?.startsWith('Option B'), `arrow nav broken, selected: ${label}`)
 
-  // Confirm bar is fixed to the viewport.
+  // Confirm bar is fixed to the viewport (after its slide-up animation ends).
+  await page.waitForTimeout(400)
   const confirmBox = await page.getByRole('button', { name: 'Confirm' }).boundingBox()
   assert(confirmBox && confirmBox.y + confirmBox.height <= 950 + 1, 'confirm bar not within viewport')
 

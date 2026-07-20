@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useScrollTop } from '../lib/useScrollTop'
 import OptionGrid from '../components/OptionGrid'
 import ProgressBar from '../components/ProgressBar'
 import Timer from '../components/Timer'
@@ -25,6 +26,9 @@ export default function Question({
   onPause?: () => void
 }) {
   const [selected, setSelected] = useState<number | null>(null)
+  // Remounted per item (key={item.id}), so each question starts at the top
+  // and replays the entry animation.
+  useScrollTop()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -39,7 +43,7 @@ export default function Question({
 
   return (
     <>
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-36 pt-5">
+      <main className="screen-enter mx-auto flex min-h-screen w-full max-w-4xl flex-col gap-4 px-4 pb-36 pt-5">
         <header className="flex items-center gap-3">
           <div className="flex-1">
             <ProgressBar position={position} total={total} sectionLabel={sectionLabel} />
@@ -78,7 +82,7 @@ export default function Question({
       </main>
 
       {/* Fixed to the viewport so Confirm is always reachable, however tall the item is. */}
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+      <footer className="footer-enter fixed inset-x-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
         <div
           className="mx-auto flex max-w-4xl flex-col gap-2 px-4 py-3"
           style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
@@ -90,7 +94,7 @@ export default function Question({
             type="button"
             disabled={selected === null}
             onClick={() => selected !== null && onConfirm(selected)}
-            className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+            className="btn-press w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
           >
             Confirm
           </button>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useScrollTop } from '../lib/useScrollTop'
 import Disclaimer from '../components/Disclaimer'
 import { replayTest, type ItemReview } from '../engine/explain'
 import { SECTION_LABEL } from '../engine/testPlan'
@@ -129,6 +130,7 @@ export default function Results({
   timings?: number[]
   onRestart: () => void
 }) {
+  useScrollTop()
   const { reviews, report } = useMemo(() => replayTest(seed, choices), [seed, choices])
   const correct = reviews.filter(r => r.correct).length
   const slowestIndex = useMemo(() => {
@@ -137,7 +139,7 @@ export default function Results({
   }, [timings])
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-8">
+    <main className="screen-enter mx-auto w-full max-w-3xl px-4 py-8">
       {/* Headline + disclaimer stay above the fold on mobile. */}
       <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Your results</h1>
       <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -211,7 +213,7 @@ export default function Results({
         <button
           type="button"
           onClick={onRestart}
-          className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700"
+          className="btn-press rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700"
         >
           Take a fresh test
         </button>

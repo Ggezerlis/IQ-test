@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useScrollTop } from '../lib/useScrollTop'
 import { SECTION_LABEL, TEST_PLAN, type Section } from '../engine/testPlan'
 
 const INTRO: Record<Section, { what: string; tip: string }> = {
@@ -30,6 +31,8 @@ export default function SectionIntro({
   const count = TEST_PLAN.filter(s => s.section === section).length
   const sectionNumber = [...new Set(TEST_PLAN.map(s => s.section))].indexOf(section) + 1
 
+  useScrollTop()
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
@@ -42,7 +45,7 @@ export default function SectionIntro({
   }, [onBegin])
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center gap-5 px-4 py-10">
+    <main className="screen-enter mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center gap-5 px-4 py-10">
       <p className="text-sm font-medium uppercase tracking-wide text-blue-700 dark:text-blue-400">
         Section {sectionNumber} of 4 · items {position + 1}–{position + count} of 30
       </p>
@@ -57,7 +60,7 @@ export default function SectionIntro({
       <button
         type="button"
         onClick={onBegin}
-        className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+        className="btn-press w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
       >
         Begin
       </button>

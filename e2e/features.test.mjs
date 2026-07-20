@@ -55,6 +55,31 @@ export default async function featuresTest(browser, baseUrl) {
   assert((await t.locator('text=Your previous runs').count()) === 0, 'clear history failed')
   await context.close()
 
+  // --- Animations + scroll reset: entry animation on every screen, and a
+  // confirm from a scrolled position starts the next item at the top.
+  const small = await browser.newContext({ viewport: { width: 480, height: 460 } })
+  const s = await small.newPage()
+  await s.goto(baseUrl)
+  const animOf = el => getComputedStyle(el).animationName
+  assert(await s.locator('.screen-enter').first().evaluate(animOf) === 'screen-in', 'home screen not animated')
+  await s.getByRole('button', { name: 'Start the test' }).first().click()
+  await s.waitForSelector('text=Section 1 of 4')
+  assert(await s.locator('main').evaluate(animOf) === 'screen-in', 'section intro not animated')
+  await s.getByRole('button', { name: 'Begin' }).click()
+  await s.waitForSelector('text=Item 1 of 30')
+  assert(await s.locator('main').evaluate(animOf) === 'screen-in', 'question screen not animated')
+  assert(await s.locator('[role=radio]').first().evaluate(animOf) === 'rise-in', 'options not animated')
+  // Scroll deep into the item, answer, and the next one must start at the top.
+  await s.mouse.wheel(0, 600)
+  await s.waitForTimeout(150)
+  assert(await s.evaluate(() => window.scrollY) > 100, 'test setup: page did not scroll')
+  await s.locator('[role=radio]').nth(0).click()
+  await s.getByRole('button', { name: 'Confirm' }).click()
+  await s.waitForSelector('text=Item 2 of 30')
+  await s.waitForTimeout(100)
+  assert((await s.evaluate(() => window.scrollY)) === 0, 'next question did not start at the top')
+  await small.close()
+
   // --- Dark mode follows the system setting.
   const darkCtx = await browser.newContext({ colorScheme: 'dark', viewport: { width: 800, height: 700 } })
   const d = await darkCtx.newPage()
@@ -69,5 +94,5 @@ export default async function featuresTest(browser, baseUrl) {
   await darkCtx.close()
   await lightCtx.close()
 
-  return 'features: practice feedback loop, pause/resume, history add/open/clear, dark mode'
+  return 'features: practice feedback, pause/resume, history, animations + scroll reset, dark mode'
 }

@@ -7,6 +7,7 @@ import type { Difficulty, ItemType } from './lib/types'
 import { addHistoryEntry, clearHistory, loadHistory, type HistoryEntry } from './lib/history'
 import { clearSession, loadSession, saveSession } from './lib/session'
 import { encodeShare, parseShare } from './lib/share'
+import { useScrollTop } from './lib/useScrollTop'
 import Home from './screens/Home'
 import Practice from './screens/Practice'
 import Question from './screens/Question'
@@ -63,6 +64,26 @@ function isSectionStart(position: number): boolean {
 function previewType(): ItemType | null {
   const p = new URLSearchParams(window.location.search).get('preview')
   return p === 'matrix' || p === 'series' || p === 'spatial' || p === 'weights' ? p : null
+}
+
+function PausedScreen({ position, onResume }: { position: number; onResume: () => void }) {
+  useScrollTop()
+  return (
+    <main className="screen-enter mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-5 px-4 py-10 text-center">
+      <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Paused</h1>
+      <p className="text-slate-600 dark:text-slate-400">
+        The clock is stopped and the current puzzle is hidden. Item {position + 1} of{' '}
+        {TOTAL_ITEMS} is waiting.
+      </p>
+      <button
+        type="button"
+        onClick={onResume}
+        className="btn-press w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
+      >
+        Resume
+      </button>
+    </main>
+  )
 }
 
 export default function App() {
@@ -172,28 +193,18 @@ export default function App() {
   if (phase.name === 'test' && phase.pausedAt !== undefined) {
     const pausedAt = phase.pausedAt
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-5 px-4 py-10 text-center">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Paused</h1>
-        <p className="text-slate-600 dark:text-slate-400">
-          The clock is stopped and the current puzzle is hidden. Item {position + 1} of{' '}
-          {TOTAL_ITEMS} is waiting.
-        </p>
-        <button
-          type="button"
-          onClick={() => {
-            const pauseMs = Date.now() - pausedAt
-            setPhase({
-              ...phase,
-              startedAt: phase.startedAt + pauseMs,
-              itemStartedAt: phase.itemStartedAt + pauseMs,
-              pausedAt: undefined,
-            })
-          }}
-          className="w-full rounded-xl bg-blue-600 py-4 text-lg font-semibold text-white transition-colors hover:bg-blue-700"
-        >
-          Resume
-        </button>
-      </main>
+      <PausedScreen
+        position={position}
+        onResume={() => {
+          const pauseMs = Date.now() - pausedAt
+          setPhase({
+            ...phase,
+            startedAt: phase.startedAt + pauseMs,
+            itemStartedAt: phase.itemStartedAt + pauseMs,
+            pausedAt: undefined,
+          })
+        }}
+      />
     )
   }
 
