@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { adsTxtEntry } from './src/lib/monetization'
 
 /**
  * og:image, og:url, JSON-LD, and the sitemap need ABSOLUTE URLs, so the
@@ -25,6 +26,10 @@ export function siteUrlPlugin(): Plugin {
         fileName: 'sitemap.xml',
         source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${siteUrl}</loc><changefreq>monthly</changefreq></url>\n</urlset>\n`,
       })
+      const adsenseClient = process.env.VITE_ADSENSE_CLIENT
+      if (adsenseClient) {
+        this.emitFile({ type: 'asset', fileName: 'ads.txt', source: adsTxtEntry(adsenseClient) })
+      }
     },
   }
 }

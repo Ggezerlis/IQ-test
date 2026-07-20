@@ -20,6 +20,7 @@ export type FunnelEvent =
   | 'test_complete'
   | 'practice_start'
   | 'share_used'
+  | 'donate_click'
 
 export function track(event: FunnelEvent, step?: number): void {
   if (!ENDPOINT) return

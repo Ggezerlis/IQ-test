@@ -31,6 +31,12 @@ jobs:
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
           # Absolute URL for og:image / og:url in link previews.
           VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          # Monetization stays off unless these repo secrets are set — see
+          # README's "Monetization" section for what each one does.
+          VITE_ADSENSE_CLIENT: ${{ secrets.VITE_ADSENSE_CLIENT }}
+          VITE_ADSENSE_SLOT_HOME: ${{ secrets.VITE_ADSENSE_SLOT_HOME }}
+          VITE_ADSENSE_SLOT_RESULTS: ${{ secrets.VITE_ADSENSE_SLOT_RESULTS }}
+          VITE_DONATE_URL: ${{ secrets.VITE_DONATE_URL }}
       # Browser-level end-to-end tests against the built site.
       - run: npx playwright@$(node -p "require('playwright-core/package.json').version") install --with-deps chromium
       - run: npm run e2e

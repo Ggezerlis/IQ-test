@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useScrollTop } from '../lib/useScrollTop'
+import AdSlot from '../components/AdSlot'
 import Disclaimer from '../components/Disclaimer'
+import DonateButton from '../components/DonateButton'
 import { replayTest, type ItemReview } from '../engine/explain'
 import type { ScoreReport } from '../engine/scoring'
 import { SECTION_LABEL } from '../engine/testPlan'
@@ -220,6 +222,10 @@ export default function Results({
       </p>
       <Disclaimer />
 
+      <div className="mt-6">
+        <AdSlot position="results" />
+      </div>
+
       <section className="mt-6" aria-label="Score by section">
         <h2 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">By section</h2>
         <div className="flex flex-col gap-3">
@@ -274,6 +280,9 @@ export default function Results({
           url={`${window.location.origin}${window.location.pathname}${encodeShare({ seed, choices })}`}
         />
         <ResultCardRow report={report} correct={correct} />
+        <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+          <DonateButton />
+        </div>
       </section>
 
       <div className="mt-8 flex gap-3">

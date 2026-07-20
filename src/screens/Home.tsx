@@ -5,7 +5,9 @@ import { generateWeightsItem } from '../generators/weights'
 import { APP_NAME } from '../lib/config'
 import type { HistoryEntry } from '../lib/history'
 import type { Figure, SVGSpec } from '../lib/types'
+import AdSlot from '../components/AdSlot'
 import Disclaimer from '../components/Disclaimer'
+import DonateButton from '../components/DonateButton'
 import { useScrollTop } from '../lib/useScrollTop'
 import { describeFigure } from '../render/shapes'
 import SvgItem from '../render/SvgItem'
@@ -44,6 +46,10 @@ const FAQS = [
   {
     q: 'Can I send someone the exact same test I took?',
     a: 'Yes. Your results page has a "challenge a friend" link that carries your seed, so they solve the identical 30 items.',
+  },
+  {
+    q: 'How is this site funded?',
+    a: 'It may show a couple of non-intrusive ads (never during the test, never blocking your score — you choose whether to allow them) and offers an optional tip. Neither is required, and your score is always free.',
   },
 ]
 
@@ -212,6 +218,10 @@ export default function Home({
         </div>
       </section>
 
+      <div className="mx-auto max-w-2xl px-4 py-6">
+        <AdSlot position="home" />
+      </div>
+
       <section className="border-t border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-950">
         <div className="mx-auto max-w-2xl px-4 py-14">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">See a real item</h2>
@@ -296,6 +306,9 @@ export default function Home({
             Start the test
           </button>
           <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">Entertainment only — not a clinical assessment.</p>
+          <div className="mt-6 flex justify-center">
+            <DonateButton />
+          </div>
         </div>
       </section>
     </div>
