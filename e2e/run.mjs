@@ -1,17 +1,15 @@
-// Orchestrator: builds if needed, serves dist on a dedicated port, runs
-// every *.test.mjs in this directory against it. Exits non-zero on the
-// first failure. Usage: npm run e2e
-import { existsSync } from 'node:fs'
+// Orchestrator: always builds a fresh, isolated bundle for e2e (see
+// vite.config.e2e.ts — base '/', its own dist-e2e), serves it on a
+// dedicated port, and runs every *.test.mjs in this directory against it.
+// Exits non-zero on the first failure. Usage: npm run e2e
 import { readdir } from 'node:fs/promises'
 import { execSync } from 'node:child_process'
 import { launchBrowser, startPreview } from './helpers.mjs'
 
 const PORT = 4174
 
-if (!existsSync('dist/index.html')) {
-  console.log('dist missing — building first')
-  execSync('npm run build', { stdio: 'inherit' })
-}
+console.log('building for e2e (dist-e2e, base "/")')
+execSync('npx tsc --noEmit && npx vite build --config vite.config.e2e.ts', { stdio: 'inherit' })
 
 const preview = await startPreview(PORT)
 const browser = await launchBrowser()

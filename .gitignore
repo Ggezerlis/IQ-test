@@ -4,3 +4,4 @@ dist-artifact
 gallery.html
 *.local
 dist-adtest
+dist-e2e

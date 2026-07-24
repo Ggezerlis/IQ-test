@@ -25,6 +25,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # Browser-level end-to-end tests, against their own isolated build
+      # (vite.config.e2e.ts) — deliberately independent of the production
+      # build below so the two can never collide on base path or output dir.
+      - run: npx playwright@$(node -p "require('playwright-core/package.json').version") install --with-deps chromium
+      - run: npm run e2e
       - run: npm run build
         env:
           # Project pages are served from /<repo>/, so Vite needs that base.
@@ -37,9 +42,6 @@ jobs:
           VITE_ADSENSE_SLOT_HOME: ${{ secrets.VITE_ADSENSE_SLOT_HOME }}
           VITE_ADSENSE_SLOT_RESULTS: ${{ secrets.VITE_ADSENSE_SLOT_RESULTS }}
           VITE_DONATE_URL: ${{ secrets.VITE_DONATE_URL }}
-      # Browser-level end-to-end tests against the built site.
-      - run: npx playwright@$(node -p "require('playwright-core/package.json').version") install --with-deps chromium
-      - run: npm run e2e
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

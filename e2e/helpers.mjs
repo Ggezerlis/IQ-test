@@ -14,9 +14,11 @@ export async function launchBrowser() {
 }
 
 export async function startPreview(port) {
-  const child = spawn('npx', ['vite', 'preview', '--port', String(port), '--strictPort'], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-  })
+  const child = spawn(
+    'npx',
+    ['vite', 'preview', '--config', 'vite.config.e2e.ts', '--port', String(port), '--strictPort'],
+    { stdio: ['ignore', 'pipe', 'pipe'] },
+  )
   const url = `http://localhost:${port}/`
   for (let i = 0; i < 60; i++) {
     try {
